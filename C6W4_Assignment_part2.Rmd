@@ -1,0 +1,68 @@
+---
+title: "ToothGrowth data analysis"
+author: "Javier Angoy"
+date: "Jun 4th, 2017"
+output: pdf_document
+---
+```{r setup, include=FALSE}
+library("ggplot2")
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Synopsis
+This document contains the second part of the assignment for the Statistical Inference Course of Coursera. The objective is to analyze the ToothGrowth dataset and try to answer the question "Do delivery method and/or Dosage affect tooth growth in guinea pigs?". 
+It consists of an analysis of the ToothGrowth dataset.  
+## Exploratory Data Analysis
+From the R datasets package we obtained the ToothGrowth dataset, entitled as "The Effect of Vitamin C on Tooth Growth in Guinea Pigs". It contains data on the response in the length of odontoblasts (cells responsible for tooth growth) in 60 guinea pigs. Each animal received one of three dose levels of vitamin C (0.5, 1, and 2 mg/day) by one of two delivery methods, (orange juice or ascorbic acid (a form of vitamin C and coded as VC).  More info on this dataset can be found via ?ToothGrowth and also on https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/ToothGrowth.html.
+
+First we must load data.  Later we explore the data
+```{r, echo=TRUE}
+data(ToothGrowth)           #Load data 
+str(ToothGrowth)            #Structure of the data
+head(ToothGrowth)           #Explore first rows of the data frame
+unique(ToothGrowth$dose)    #Three different doses to administer 
+levels(ToothGrowth$supp)    #Two different ways of dose administering
+```
+So we observe that the ToothGrowth dataset has 3 columns. The first column "len" contains the response in the length of odontoblasts in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) according to "dose" with each of two delivery methods (orange juice or ascorbic acid, OJ or VC respectively) stored on "supp".
+
+Now we plot the data and continue to analyze.
+```{r, echo=TRUE, out.width = "80%", fig.align="center"}
+par(mfrow=c(1,2))
+with(ToothGrowth, plot(len ~ as.factor(dose) + supp))
+```
+```{r, echo=TRUE, out.width = "80%", fig.align="center"}
+coplot(len ~ as.factor(dose) | supp, data = ToothGrowth, panel = panel.smooth, 
+       xlab = "ToothGrowth data: length vs dose, given type of supplement")
+```
+
+## Key Assumptions 
+For this analysis, we supplose that the sample of guinea pigs are representative of the universe of guinea pigs and the 60 animals were randomly assigned to the given doses and delivery methods.  The observations are statistically independent. The two populations being compared have the same variance.
+
+We have to keep in mind that we want to answer if delivery method and/or dosage affect tooth growth in guinea pigs. Watching the previous plot we observe a clear positive relation between dose and lenght, that is to say that the bigger the dose is, the larger the lenght for both delivery methods.
+Our null hypothesis is $$H_{0} : \mu_{1} =  \mu_{2}$$ being $\mu_{1},\mu_{2}$ the average growth for each sample group. 
+
+## Hypothesis Tests 
+To determine the relation between dose and length, we found that there are three dose levels to analyze. This leads us to perform the study in pairs of values, so we have three different tests:  For pairs (0.5 - 1), (1 - 2), and (0.5 - 2).
+
+### First pair (0.5 - 1)
+```{r}
+t.test(ToothGrowth[which(ToothGrowth$dose==0.5),]$len, 
+       ToothGrowth[which(ToothGrowth$dose==1),]$len)
+```
+The 95% confidence interval doesn’t contain 0 and p-value is below 0.5 so reject the null hypothesis.
+
+### Second pair (1 - 2)
+```{r}
+t.test(ToothGrowth[which(ToothGrowth$dose==1),]$len, 
+       ToothGrowth[which(ToothGrowth$dose==2),]$len)
+```
+The 95% confidence interval doesn’t contain 0 and p-value is below 0.5 so reject the null hypothesis.
+
+### Third pair (0.5 - 2)
+```{r}
+t.test(ToothGrowth[which(ToothGrowth$dose==0.5),]$len, 
+       ToothGrowth[which(ToothGrowth$dose==2),]$len)
+```
+The 95% confidence interval doesn’t contain 0 and p-value is below 0.5 so reject the null hypothesis.
+
+## Conclusions 
+Having rejected the null hypothesis for the three pairs of values, it can be affirmed that there is difference between the means of the groups of values (0.5, 1 and 2). Thus we can conclude that there is a relationship between the supply of vitamin C and the variation in odontoblasts length.
